@@ -13,7 +13,7 @@ if [ -n "$JWT_PRIVATE_KEY_B64" ] && [ -n "$JWT_PUBLIC_KEY_B64" ]; then
     chmod 644 /var/www/html/config/jwt/public.pem
     echo ">>> Claves JWT restauradas."
 else
-    echo ">>> ADVERTENCIA: JWT_PRIVATE_KEY_B64 o JWT_PUBLIC_KEY_B64 no están definidas. Omitiendo restauración de claves JWT."
+    echo ">>> ADVERTENCIA: JWT_PRIVATE_KEY_B64 o JWT_PUBLIC_KEY_B64 no están definidas. Las claves JWT no serán configuradas."
 fi
 
 # ── 2. Limpiar y calentar caché en modo prod ──
