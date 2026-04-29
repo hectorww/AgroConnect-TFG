@@ -26,11 +26,18 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copiar código del proyecto
-COPY . .
+# Copiar composer.json y composer.lock primero (cache de capas Docker)
+COPY composer.json composer.lock ./
 
 # Instalar dependencias PHP (sin dev, modo prod)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
+# SIN --no-scripts para que Symfony pueda generar autoload_runtime.php
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Copiar el resto del código
+COPY . .
+
+# Asegurar que el autoloader está actualizado con todo el código
+RUN composer dump-autoload --optimize --no-dev
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p var/cache var/log config/jwt \
