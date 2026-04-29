@@ -1,13 +1,12 @@
 # ── Stage 1: Build Angular ──────────────────────────────────────────
-FROM node:20 AS builder
+FROM node:20-bullseye AS builder
 
 WORKDIR /app
 
 # Copiar solo dependencias
 COPY package*.json ./
 
-# 🔥 CLAVE: evitar bug de npm con optionalDependencies (oxide)
-RUN rm -rf node_modules package-lock.json && npm install
+RUN npm install --platform=linux --arch=x64
 
 # Copiar el resto del código
 COPY . .
