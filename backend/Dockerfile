@@ -33,8 +33,11 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Crear directorios necesarios con permisos correctos
+# config/jwt/ is created here so the entrypoint can write the PEM files
+# decoded from JWT_PRIVATE_KEY_B64 / JWT_PUBLIC_KEY_B64 at container start
 RUN mkdir -p var/cache var/log config/jwt \
-    && chmod -R 777 var/
+    && chmod -R 777 var/ \
+    && chmod 755 config/jwt
 
 # Configurar nginx
 COPY docker/nginx.conf /etc/nginx/nginx.conf
