@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  apiUrl: 'https://agroconnect-tfg-production.up.railway.app',
+  production: false,
+  apiUrl: 'http://localhost:8000',
 };
