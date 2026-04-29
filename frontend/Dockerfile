@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copiar manifiestos primero (mejor cache de capas)
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # Copiar el resto del fuente
 COPY . .
