@@ -3,7 +3,7 @@ set -e
 
 echo "=== AgroConnect Backend - Iniciando ==="
 
-# ── 1. Generar claves JWT si no existen (Railway las inyecta como env vars) ──
+# ── 1. Restaurar claves JWT desde variables de entorno ──
 if [ -n "$JWT_PRIVATE_KEY_B64" ]; then
     echo ">>> Restaurando claves JWT desde variables de entorno..."
     echo "$JWT_PRIVATE_KEY_B64" | base64 -d > /var/www/html/config/jwt/private.pem
@@ -12,14 +12,15 @@ if [ -n "$JWT_PRIVATE_KEY_B64" ]; then
     echo ">>> Claves JWT restauradas."
 fi
 
-# ── 2. Limpiar y calentar caché en modo prod ──
+# ── 2. Calentar caché ──
 echo ">>> Calentando caché de Symfony..."
 php bin/console cache:warmup --env=prod --no-debug || true
 
-# ── 3. Ejecutar migraciones de base de datos ──
-echo ">>> Ejecutando migraciones..."
-php bin/console doctrine:schema:create --env=prod --no-interaction || true
-php bin/console doctrine:migrations:version --add --all --no-interaction --env=prod || true
+# ── 3. Ejecutar migraciones ──
+# Si la BD está vacía, crea el schema y marca todo como ejecutado
+# Si ya tiene tablas, migrate se encarga de aplicar solo las pendientes
+echo ">>> Verificando schema de base de datos..."
+php bin/console doctrine:migrations:migrate --no-interaction --env=prod || true
 
 echo "=== Arrancando nginx + php-fpm ==="
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
