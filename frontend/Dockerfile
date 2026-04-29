@@ -3,13 +3,6 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-
-# API_URL se pasa como build arg desde Railway
-ARG API_URL=https://agroconnect-tfg-production.up.railway.app
-
-# Reemplazar en environment.prod.ts (el que usa la build de producción)
-RUN sed -i "s|http://localhost:8000|${API_URL}|g" src/environments/environment.prod.ts
-
 RUN npm run build
 
 FROM nginx:alpine
