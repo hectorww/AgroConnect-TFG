@@ -7,29 +7,25 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
-/**
- * Auto-generated Migration: Please modify to your needs!
- */
 final class Version20260427174745 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return '';
+        return 'Add cultivo to fincas';
     }
 
     public function up(Schema $schema): void
     {
-        // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE fincas ADD cultivo VARCHAR(100) DEFAULT NULL, ADD latitud DOUBLE PRECISION DEFAULT NULL, ADD longitud DOUBLE PRECISION DEFAULT NULL');
-        $this->addSql('DROP INDEX token ON user');
-        $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D6495F37A13B ON user (token)');
+        // Solo añade cultivo si no existe ya latitud/longitud (evita duplicado con migración anterior)
+        $this->addSql("SET @exist := (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE table_schema = DATABASE() AND table_name = 'fincas' AND column_name = 'cultivo')");
+        $this->addSql("SET @sql := IF(@exist = 0, 'ALTER TABLE fincas ADD cultivo VARCHAR(100) DEFAULT NULL', 'SELECT 1')");
+        $this->addSql('PREPARE stmt FROM @sql');
+        $this->addSql('EXECUTE stmt');
+        $this->addSql('DEALLOCATE PREPARE stmt');
     }
 
     public function down(Schema $schema): void
     {
-        // this down() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE fincas DROP cultivo, DROP latitud, DROP longitud');
-        $this->addSql('DROP INDEX uniq_8d93d6495f37a13b ON user');
-        $this->addSql('CREATE UNIQUE INDEX token ON user (token)');
+        $this->addSql('ALTER TABLE fincas DROP cultivo');
     }
 }
