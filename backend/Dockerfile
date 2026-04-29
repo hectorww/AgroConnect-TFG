@@ -29,15 +29,16 @@ WORKDIR /var/www/html
 # Copiar composer.json y composer.lock primero (cache de capas Docker)
 COPY composer.json composer.lock ./
 
-# Instalar dependencias PHP (sin dev, modo prod)
-# SIN --no-scripts para que Symfony pueda generar autoload_runtime.php
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# COMPOSER_ALLOW_SUPERUSER evita warnings de root
+ENV COMPOSER_ALLOW_SUPERUSER=1
+
+# --no-scripts evita el fallo de symfony-cmd (no existe en Alpine)
+# dump-autoload por separado genera autoload_runtime.php correctamente
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts \
+    && composer dump-autoload --optimize --no-dev --no-scripts
 
 # Copiar el resto del código
 COPY . .
-
-# Asegurar que el autoloader está actualizado con todo el código
-RUN composer dump-autoload --optimize --no-dev
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p var/cache var/log config/jwt \
