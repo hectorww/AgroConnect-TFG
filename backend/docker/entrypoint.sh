@@ -18,7 +18,8 @@ php bin/console cache:warmup --env=prod --no-debug || true
 
 # ── 3. Ejecutar migraciones de base de datos ──
 echo ">>> Ejecutando migraciones..."
-php bin/console doctrine:migrations:migrate --no-interaction --env=prod || true
+php bin/console doctrine:schema:create --env=prod --no-interaction || true
+php bin/console doctrine:migrations:version --add --all --no-interaction --env=prod || true
 
 echo "=== Arrancando nginx + php-fpm ==="
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
