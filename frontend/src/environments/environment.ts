@@ -5,5 +5,5 @@ export const environment = {
 
 export const environment = {
   production: true,
-  apiUrl: 'agroconnect-tfg-production.up.railway.app',
+  apiUrl: 'https://agroconnect-tfg-production.up.railway.app',
 };
