@@ -30,7 +30,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Instalar dependencias PHP (sin dev, modo prod)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Crear directorios necesarios con permisos correctos
 RUN mkdir -p var/cache var/log config/jwt \
