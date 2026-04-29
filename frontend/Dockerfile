@@ -3,20 +3,20 @@ FROM node:20 AS builder
 
 WORKDIR /app
 
-# Copiar dependencias
+# Copiar solo dependencias
 COPY package*.json ./
 
-# Instalar SIN hacks raros
-RUN npm install
+# 🔥 CLAVE: evitar bug de npm con optionalDependencies (oxide)
+RUN rm -rf node_modules package-lock.json && npm install
 
-# Copiar código
+# Copiar el resto del código
 COPY . .
 
-# 🔥 Reemplazar API antes del build
+# Reemplazar API antes del build
 ARG API_URL=https://your-backend.up.railway.app
 RUN sed -i "s|http://localhost:8000|${API_URL}|g" src/environments/environment.ts
 
-# Build UNA sola vez
+# Build
 RUN npm run build
 
 # ── Stage 2: Servir con nginx ────────────────────────────────────────
