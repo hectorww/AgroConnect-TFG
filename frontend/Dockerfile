@@ -5,10 +5,14 @@ WORKDIR /app
 
 # Copiar manifiestos primero (mejor cache de capas)
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
 
-# Copiar el resto del fuente
+RUN npm install --legacy-peer-deps --include=optional
+
+RUN npm install lightningcss --force
+
 COPY . .
+
+RUN npm run build
 
 # Build de producción - usa la variable de entorno para la API URL
 ARG API_URL=https://your-backend.up.railway.app
