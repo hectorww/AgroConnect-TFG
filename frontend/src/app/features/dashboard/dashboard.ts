@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common'; 
 import { RouterLink } from '@angular/router';
 import { Navbar } from '../../shared/navbar/navbar';
 import { FincaService } from '../../core/services/finca.service';
 import { Finca } from '../../core/models/finca';
 import { ChartModule } from 'primeng/chart';
+import { WeatherService } from '../../core/services/weather.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -17,10 +18,14 @@ export class Dashboard implements OnInit {
   fincas: Finca[] = [];
   loading = true;
 
+  // Estadísticas generales
   totalFincas = 0;
   totalHectareas = 0;
   cultivosActivos = 0;
-  alertasPendientes = 3;
+
+  // Variables para TU sistema de alertas
+  alertasPendientes = 0;
+  alertasReales: any[] = [];
 
   // Datos para gráficas
   evolutionChartData: any;
@@ -66,17 +71,75 @@ export class Dashboard implements OnInit {
     }
   };
 
-  constructor(private fincaService: FincaService) { }
+  // Inyectamos el ChangeDetectorRef (el martillo de Angular)
+  constructor(
+    private fincaService: FincaService,
+    private weatherService: WeatherService,
+    private cdr: ChangeDetectorRef 
+  ) { }
 
   ngOnInit() {
-    this.fincaService.getFincas().subscribe(data => {
-      this.fincas = data;
-      this.calculateStats();
-      this.initCharts();
-      this.loading = false;
+    this.fincaService.getFincas().subscribe({
+      next: (data) => {
+        this.fincas = data;
+        this.calculateStats();
+        this.initCharts();
+        
+        // Ejecutamos tu Inteligencia Climática
+        this.cargarAlertasClimaticas();
+        
+        this.loading = false;
+        
+        // FORZAMOS A ANGULAR A PINTAR LA PANTALLA
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => {
+        console.error('Error al cargar fincas de Mario:', err);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
+  // --- TU LÓGICA DE CLIMA ---
+  cargarAlertasClimaticas() {
+    this.alertasReales = [];
+    this.alertasPendientes = 0;
+
+    this.fincas.forEach(finca => {
+      // Ajuste de seguridad: por si el backend lo manda como latitud/longitud
+      let lat = (finca as any).latitud || finca.lat;
+      let lon = (finca as any).longitud || finca.lon;
+
+      // Plan B: Si Mario mandó las coordenadas dentro de geo_json
+      if (!lat && finca.geo_json && finca.geo_json.length >= 2) {
+         lon = finca.geo_json[0];
+         lat = finca.geo_json[1];
+      }
+
+      if (lat && lon) {
+        this.weatherService.getAnalisisClimatico(lat, lon).subscribe({
+          next: (datosClima) => {
+            if (datosClima.analisis_inteligente.nivel !== 'BAJO') {
+              this.alertasReales.push({
+                fincaNombre: finca.nombre,
+                clima: datosClima
+              });
+              this.alertasPendientes = this.alertasReales.length;
+              
+              // FORZAMOS A ANGULAR A PINTAR LA ALERTA EN CUANTO LLEGUE
+              this.cdr.detectChanges();
+            }
+          },
+          error: (err) => {
+            console.error(`Error de clima para ${finca.nombre}`, err);
+          }
+        });
+      }
+    });
+  }
+
+  // --- LÓGICA DE GRÁFICAS DE HÉCTOR ---
   calculateStats() {
     this.totalFincas = this.fincas.length;
     this.totalHectareas = this.fincas.reduce((sum, f) => sum + f.hectareas, 0);
@@ -84,7 +147,6 @@ export class Dashboard implements OnInit {
   }
 
   initCharts() {
-    // Agrupar hectáreas por cultivo
     const cultivoMap = new Map<string, number>();
     this.fincas.forEach(f => {
       cultivoMap.set(f.cultivo, (cultivoMap.get(f.cultivo) || 0) + f.hectareas);
@@ -93,26 +155,23 @@ export class Dashboard implements OnInit {
     const labels = Array.from(cultivoMap.keys());
     const values = Array.from(cultivoMap.values());
 
-    // Gráfica de distribución (doughnut)
+    // 🎨 MOTOR DE COLORES DINÁMICOS E INFINITOS (Ángulo Áureo)
+    const backgroundColors = labels.map((_, index) => `hsl(${(index * 137.5) % 360}, 70%, 60%)`);
+    const hoverColors = labels.map((_, index) => `hsl(${(index * 137.5) % 360}, 75%, 75%)`);
+
     this.distributionChartData = {
       labels: labels,
       datasets: [{
         data: values,
-        backgroundColor: [
-          '#4CAF50',
-          '#8BC34A',
-          '#66BB6A',
-          '#388E3C',
-          '#81C784',
-          '#2E7D32'
-        ],
+        backgroundColor: backgroundColors,
+        hoverBackgroundColor: hoverColors,
+        borderColor: 'transparent',
         borderWidth: 0
       }]
     };
 
-    // Gráfica de evolución - datos reales basados en histórico mock
     const currentTotal = this.totalHectareas;
-    const sixMonthsAgo = currentTotal * 0.77; // ~120 ha
+    const sixMonthsAgo = currentTotal * 0.77; 
     const growth = (currentTotal - sixMonthsAgo) / 5;
 
     this.evolutionChartData = {

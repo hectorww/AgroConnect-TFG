@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, throwError, catchError } from 'rxjs';
+import { Observable, tap, throwError, catchError, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface LoginResponse {
@@ -39,6 +39,7 @@ export class AuthService {
         password,
       })
       .pipe(
+        timeout(8000),
         tap((res) => this.saveToken(res.token)),
         catchError((err) => throwError(() => err))
       );
@@ -48,7 +49,7 @@ export class AuthService {
   register(data: RegisterRequest): Observable<{ message: string }> {
     return this.http
       .post<{ message: string }>(`${environment.apiUrl}/api/register`, data)
-      .pipe(catchError((err) => throwError(() => err)));
+      .pipe(timeout(8000), catchError((err) => throwError(() => err)));
   }
 
   // POST /api/logout  (requiere JWT)
@@ -93,6 +94,17 @@ export class AuthService {
     const token = this.getToken();
     if (!token) return false;
     return !this.isTokenExpired(token);
+  }
+
+  getEmailFromToken(): string {
+    const token = this.getToken();
+    if (!token) return '';
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.username ?? payload.email ?? '';
+    } catch {
+      return '';
+    }
   }
 
   private isTokenExpired(token: string): boolean {

@@ -36,7 +36,10 @@ class FincasController extends AbstractController
                 'user_id' => $finca->getUser()?->getId(),
                 'nombre' => $finca->getNombre(),
                 'hectareas' => $finca->getHectareas(),
+                'cultivo' => $finca->getCultivo(),
                 'geo_json' => $finca->getGeoJson(),
+                'latitud' => $finca->getLatitud(),   // AÑADIDO
+                'longitud' => $finca->getLongitud(), // AÑADIDO
             ];
         }
 
@@ -56,7 +59,6 @@ class FincasController extends AbstractController
             return $this->json(['error' => 'Invalid JSON format'], 400);
         }
 
-        // Validar campos requeridos
         if (!isset($data['nombre'])) {
             return $this->json(['error' => 'Field nombre is required'], 400);
         }
@@ -64,16 +66,18 @@ class FincasController extends AbstractController
         $nombre = $data['nombre'];
         $hectareas = $data['hectareas'] ?? null;
         $geoJson = $data['geo_json'] ?? [];
+        $cultivo = $data['cultivo'] ?? null;
+        
+        // AÑADIDO: Capturar coordenadas del Frontend
+        $latitud = $data['latitud'] ?? null;
+        $longitud = $data['longitud'] ?? null;
 
-        // Validar nombre
         if (!is_string($nombre) || strlen($nombre) === 0) {
             return $this->json(['error' => 'Field nombre must be a non-empty string'], 400);
         }
         if (strlen($nombre) > 255) {
             return $this->json(['error' => 'Field nombre must not exceed 255 characters'], 400);
         }
-
-        // Validar hectareas
         if ($hectareas !== null) {
             if (!is_numeric($hectareas)) {
                 return $this->json(['error' => 'Field hectareas must be numeric'], 400);
@@ -82,8 +86,6 @@ class FincasController extends AbstractController
                 return $this->json(['error' => 'Field hectareas must be greater than 0'], 400);
             }
         }
-
-        // Validar que geo_json sea un array
         if (!is_array($geoJson)) {
             return $this->json(['error' => 'Field geo_json must be an array'], 400);
         }
@@ -92,7 +94,13 @@ class FincasController extends AbstractController
         $finca->setUser($user);
         $finca->setNombre($nombre);
         $finca->setHectareas($hectareas);
+        $finca->setCultivo($cultivo);
         $finca->setGeoJson($geoJson);
+        
+        // AÑADIDO: Guardar coordenadas en la entidad
+        $finca->setLatitud($latitud);
+        $finca->setLongitud($longitud);
+
         $entityManager->persist($finca);
         $entityManager->flush();
 
@@ -101,10 +109,13 @@ class FincasController extends AbstractController
             'user_id' => $finca->getUser()->getId(),
             'nombre' => $finca->getNombre(),
             'hectareas' => $finca->getHectareas(),
+            'cultivo' => $finca->getCultivo(),
             'geo_json' => $finca->getGeoJson(),
+            'latitud' => $finca->getLatitud(),   // AÑADIDO
+            'longitud' => $finca->getLongitud(), // AÑADIDO
         ];
 
-        return $this->json($responseData);
+        return $this->json($responseData, 201);
     }
 
     #[Route('/fincas/{id}', name: 'fincas_show', methods: ['get'])]
@@ -118,12 +129,7 @@ class FincasController extends AbstractController
         if (!$finca) {
             return $this->json(['error' => 'Finca not found'], 404);
         }
-
         $fincaUser = $finca->getUser();
-        if (!$fincaUser) {
-            return $this->json(['error' => 'Finca user not found'], 500);
-        }
-
         if (!$user->isAdmin() && $fincaUser->getId() !== $user->getId()) {
             return $this->json(['error' => 'Unauthorized'], 403);
         }
@@ -133,7 +139,10 @@ class FincasController extends AbstractController
             'user_id' => $finca->getUser()?->getId(),
             'nombre' => $finca->getNombre(),
             'hectareas' => $finca->getHectareas(),
+            'cultivo' => $finca->getCultivo(),
             'geo_json' => $finca->getGeoJson(),
+            'latitud' => $finca->getLatitud(),   // AÑADIDO
+            'longitud' => $finca->getLongitud(), // AÑADIDO
         ];
 
         return $this->json($data);
@@ -150,12 +159,7 @@ class FincasController extends AbstractController
         if (!$finca) {
             return $this->json(['error' => 'Finca not found'], 404);
         }
-
         $fincaUser = $finca->getUser();
-        if (!$fincaUser) {
-            return $this->json(['error' => 'Finca user not found'], 500);
-        }
-
         if (!$user->isAdmin() && $fincaUser->getId() !== $user->getId()) {
             return $this->json(['error' => 'Unauthorized'], 403);
         }
@@ -166,35 +170,25 @@ class FincasController extends AbstractController
             return $this->json(['error' => 'Invalid JSON format'], 400);
         }
 
-        // Validar nombre si se proporciona
         if (isset($data['nombre'])) {
-            $nombre = $data['nombre'];
-            if (!is_string($nombre) || strlen($nombre) === 0) {
-                return $this->json(['error' => 'Field nombre must be a non-empty string'], 400);
-            }
-            if (strlen($nombre) > 255) {
-                return $this->json(['error' => 'Field nombre must not exceed 255 characters'], 400);
-            }
-            $finca->setNombre($nombre);
+            $finca->setNombre($data['nombre']);
         }
-
-        // Validar hectareas si se proporciona
         if (isset($data['hectareas'])) {
-            if (!is_numeric($data['hectareas'])) {
-                return $this->json(['error' => 'Field hectareas must be numeric'], 400);
-            }
-            if ($data['hectareas'] <= 0) {
-                return $this->json(['error' => 'Field hectareas must be greater than 0'], 400);
-            }
             $finca->setHectareas($data['hectareas']);
         }
-
-        // Validar geo_json si se proporciona
         if (isset($data['geo_json'])) {
-            if (!is_array($data['geo_json'])) {
-                return $this->json(['error' => 'Field geo_json must be an array'], 400);
-            }
             $finca->setGeoJson($data['geo_json']);
+        }
+        if (array_key_exists('cultivo', $data)) {
+            $finca->setCultivo($data['cultivo']);
+        }
+        
+        // AÑADIDO: Actualizar coordenadas
+        if (array_key_exists('latitud', $data)) {
+            $finca->setLatitud($data['latitud']);
+        }
+        if (array_key_exists('longitud', $data)) {
+            $finca->setLongitud($data['longitud']);
         }
 
         $entityManager->flush();
@@ -204,7 +198,10 @@ class FincasController extends AbstractController
             'user_id' => $finca->getUser()->getId(),
             'nombre' => $finca->getNombre(),
             'hectareas' => $finca->getHectareas(),
+            'cultivo' => $finca->getCultivo(),
             'geo_json' => $finca->getGeoJson(),
+            'latitud' => $finca->getLatitud(),   // AÑADIDO
+            'longitud' => $finca->getLongitud(), // AÑADIDO
         ];
 
         return $this->json($responseData);
@@ -221,12 +218,7 @@ class FincasController extends AbstractController
         if (!$finca) {
             return $this->json(['error' => 'Finca not found'], 404);
         }
-
         $fincaUser = $finca->getUser();
-        if (!$fincaUser) {
-            return $this->json(['error' => 'Finca user not found'], 500);
-        }
-
         if (!$user->isAdmin() && $fincaUser->getId() !== $user->getId()) {
             return $this->json(['error' => 'Unauthorized'], 403);
         }

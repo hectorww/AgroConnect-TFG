@@ -1,0 +1,147 @@
+<app-navbar></app-navbar>
+<p-toast position="top-right"></p-toast>
+
+<div class="profile-page">
+  <div class="profile-header">
+    <h1 class="profile-title">Mi Perfil</h1>
+    <p class="profile-subtitle">
+      Gestiona tu acceso y seguridad de cuenta sin salir de AgroConnect.
+    </p>
+  </div>
+
+  <div class="profile-grid">
+    <section class="profile-card">
+      <div class="card-head">
+        <h2>Correo electrónico</h2>
+        <span class="badge">Cuenta</span>
+      </div>
+
+      <p class="current-value">
+        Correo actual:
+        <strong>{{ currentEmail || 'No disponible' }}</strong>
+      </p>
+
+      <form class="form-stack" (ngSubmit)="onSubmitEmail()">
+        <label class="field-label" for="newEmail">Nuevo correo</label>
+        <input
+          id="newEmail"
+          name="newEmail"
+          type="email"
+          class="field-input"
+          [(ngModel)]="emailForm.newEmail"
+          [class.input-error]="showEmailErrors && !emailForm.newEmail.trim()"
+          placeholder="agricultor@ejemplo.com"
+          autocomplete="email"
+        />
+        <span class="field-error" *ngIf="showEmailErrors && !emailForm.newEmail.trim()">
+          Introduce un correo válido
+        </span>
+
+        <label class="field-label" for="emailPassword">Contraseña actual</label>
+        <input
+          id="emailPassword"
+          name="emailPassword"
+          type="password"
+          class="field-input"
+          [(ngModel)]="emailForm.password"
+          [class.input-error]="showEmailErrors && !emailForm.password"
+          placeholder="Tu contraseña actual"
+          autocomplete="current-password"
+        />
+        <span class="field-error" *ngIf="showEmailErrors && !emailForm.password">
+          Necesitamos tu contraseña para confirmar el cambio
+        </span>
+
+        <button type="submit" class="btn-primary" [disabled]="savingEmail">
+          {{ savingEmail ? 'Guardando...' : 'Actualizar correo' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="profile-card">
+      <div class="card-head">
+        <h2>Contraseña</h2>
+        <span class="badge">Seguridad</span>
+      </div>
+
+      <form class="form-stack" (ngSubmit)="onSubmitPassword()">
+        <label class="field-label" for="currentPassword">Contraseña actual</label>
+        <div class="password-wrap">
+          <input
+            id="currentPassword"
+            name="currentPassword"
+            [type]="showCurrentPassword ? 'text' : 'password'"
+            class="field-input"
+            [(ngModel)]="passwordForm.currentPassword"
+            [class.input-error]="showPasswordErrors && !passwordForm.currentPassword"
+            placeholder="Tu contraseña actual"
+            autocomplete="current-password"
+          />
+          <button type="button" class="toggle-btn" (click)="showCurrentPassword = !showCurrentPassword">
+            {{ showCurrentPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <span class="field-error" *ngIf="showPasswordErrors && !passwordForm.currentPassword">
+          La contraseña actual es obligatoria
+        </span>
+
+        <label class="field-label" for="newPassword">Nueva contraseña</label>
+        <div class="password-wrap">
+          <input
+            id="newPassword"
+            name="newPassword"
+            [type]="showNewPassword ? 'text' : 'password'"
+            class="field-input"
+            [(ngModel)]="passwordForm.newPassword"
+            [class.input-error]="showPasswordErrors && passwordForm.newPassword.length > 0 && passwordForm.newPassword.length < 6"
+            placeholder="Mínimo 6 caracteres"
+            autocomplete="new-password"
+          />
+          <button type="button" class="toggle-btn" (click)="showNewPassword = !showNewPassword">
+            {{ showNewPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <span
+          class="field-error"
+          *ngIf="showPasswordErrors && passwordForm.newPassword.length > 0 && passwordForm.newPassword.length < 6"
+        >
+          La nueva contraseña debe tener al menos 6 caracteres
+        </span>
+
+        <label class="field-label" for="confirmPassword">Confirmar nueva contraseña</label>
+        <div class="password-wrap">
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            class="field-input"
+            [(ngModel)]="passwordForm.confirmPassword"
+            [class.input-error]="showPasswordErrors && passwordForm.confirmPassword && passwordForm.confirmPassword !== passwordForm.newPassword"
+            placeholder="Repite la nueva contraseña"
+            autocomplete="new-password"
+          />
+          <button type="button" class="toggle-btn" (click)="showConfirmPassword = !showConfirmPassword">
+            {{ showConfirmPassword ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        <span
+          class="field-error"
+          *ngIf="showPasswordErrors && passwordForm.confirmPassword && passwordForm.confirmPassword !== passwordForm.newPassword"
+        >
+          Las contraseñas no coinciden
+        </span>
+
+        <button type="submit" class="btn-primary" [disabled]="savingPassword">
+          {{ savingPassword ? 'Guardando...' : 'Cambiar contraseña' }}
+        </button>
+      </form>
+    </section>
+  </div>
+
+  <section class="logout-card">
+    <p>Si estás en un dispositivo compartido, cierra la sesión para proteger tu cuenta.</p>
+    <button type="button" class="btn-danger" (click)="cerrarSesion()">
+      Cerrar sesión
+    </button>
+  </section>
+</div>

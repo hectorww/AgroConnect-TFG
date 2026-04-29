@@ -10,11 +10,6 @@ import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth';
 
-/**
- * Interceptor funcional (Angular 17+).
- * Añade el header Authorization: Bearer <token> a todas las peticiones
- * que van a la API, y redirige al login si recibe 401.
- */
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
@@ -26,6 +21,10 @@ export const authInterceptor: HttpInterceptorFn = (
   const publicRoutes = ['/api/register', '/api/login_check'];
   const isPublic = publicRoutes.some(route => req.url.includes(route));
 
+  // Rutas donde un 401 NO significa sesión expirada sino credencial incorrecta
+  const skipRedirectOn401 = ['/api/change-password', '/api/change-email'];
+  const skipRedirect = skipRedirectOn401.some(route => req.url.includes(route));
+
   const token = authService.getToken();
 
   const authReq = (token && !isPublic)
@@ -34,7 +33,7 @@ export const authInterceptor: HttpInterceptorFn = (
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isPublic) {
+      if (error.status === 401 && !isPublic && !skipRedirect) {
         localStorage.removeItem('jwt_token');
         router.navigate(['/login']);
       }

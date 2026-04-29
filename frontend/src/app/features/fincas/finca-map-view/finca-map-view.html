@@ -1,0 +1,80 @@
+<app-navbar></app-navbar>
+
+<div class="map-shell">
+
+  <div class="map-toolbar">
+
+    <!-- Lado izquierdo: título + stats (ocupa el espacio sobrante) -->
+    <div class="toolbar-left">
+      <div class="toolbar-titulo">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+          <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+        </svg>
+        Mis Fincas en el Mapa
+      </div>
+
+      <div class="toolbar-stats" *ngIf="!cargando">
+        <span class="stat-chip">
+          <span class="stat-dot stat-dot--green"></span>
+          {{ totalFincas }} finca{{ totalFincas !== 1 ? 's' : '' }}
+        </span>
+        <span class="stat-chip stat-chip--warn" *ngIf="fincasSinZona > 0">
+          <span class="stat-dot stat-dot--orange"></span>
+          {{ fincasSinZona }} sin zona
+        </span>
+      </div>
+    </div>
+
+    <!-- Lado derecho: controles fijos (nunca se mueven) -->
+    <div class="toolbar-right">
+      <div class="tile-selector">
+        <button class="tile-btn" [class.tile-btn--activo]="tiloActivo === 'osm'" (click)="cambiarTile('osm')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+            <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
+          </svg>
+          Callejero
+        </button>
+        <button class="tile-btn" [class.tile-btn--activo]="tiloActivo === 'satelite'" (click)="cambiarTile('satelite')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          Satélite
+        </button>
+      </div>
+
+      <button class="icon-btn" (click)="centrarEnMiUbicacion()" title="Mi ubicación">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="map-wrapper">
+    <div id="finca-map-view-container"></div>
+
+    <div class="loading-overlay" *ngIf="cargando">
+      <div class="loading-spinner"></div>
+      <span>Cargando fincas…</span>
+    </div>
+
+    <div class="coords-badge" *ngIf="coordsCentro">
+      {{ coordsCentro.lat }}, {{ coordsCentro.lng }}
+    </div>
+
+    <div class="aviso-sin-zona" *ngIf="!cargando && fincasSinZona > 0">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      {{ fincasSinZona }} finca{{ fincasSinZona !== 1 ? 's' : '' }} sin zona. Edítalas para añadirla.
+    </div>
+  </div>
+
+</div>

@@ -1,4 +1,288 @@
-#map {
-  height: calc(100vh - 57px);
-  width: 100%;
+
+:host {
+  --c-primary:      #4CAF50;
+  --c-primary-dark: #2E7D32;
+  --c-accent:       #8BC34A;
+  --c-dark:         #1a2e1a;
+  --c-dark-2:       #162612;
+  --c-surface:      #213521;
+  --c-surface-2:    #2a422a;
+  --c-border:       rgba(139, 195, 74, 0.15);
+  --c-border-mid:   rgba(139, 195, 74, 0.30);
+  --c-text:         rgba(255, 255, 255, 0.85);
+  --c-text-muted:   rgba(255, 255, 255, 0.45);
+  --c-danger:       #ef5350;
+  font-family: 'Inter', system-ui, sans-serif;
+  display: block;
 }
+
+/* ── Shell principal ─────────────────────────────────────────────────────────── */
+.map-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 57px);     /* standalone: ocupa el resto de pantalla */
+  background: var(--c-dark-2);
+}
+
+/* En modo embebido (dentro del form) el alto es fijo */
+.map-shell--embebido {
+  height: auto;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--c-border-mid);
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────────── */
+.map-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--c-surface);
+  border-bottom: 1px solid var(--c-border);
+  flex-wrap: wrap;
+}
+
+.toolbar-titulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--c-accent);
+  margin-right: auto;
+}
+
+/* ── Selector de tiles ───────────────────────────────────────────────────────── */
+.tile-selector {
+  display: flex;
+  gap: 5px;
+  background: var(--c-dark);
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  padding: 3px;
+}
+
+.tile-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--c-text-muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.tile-btn:hover {
+  color: var(--c-text);
+  background: var(--c-surface-2);
+}
+
+.tile-btn--activo {
+  background: var(--c-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.tile-btn--activo:hover {
+  background: var(--c-primary-dark);
+}
+
+/* ── Acciones rápidas ────────────────────────────────────────────────────────── */
+.toolbar-acciones {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--c-border);
+  border-radius: 7px;
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.icon-btn:hover {
+  background: var(--c-surface);
+  border-color: var(--c-border-mid);
+  color: var(--c-accent);
+}
+
+.icon-btn--danger {
+  color: var(--c-danger);
+  border-color: rgba(239, 83, 80, 0.25);
+}
+
+.icon-btn--danger:hover {
+  background: rgba(239, 83, 80, 0.08);
+  border-color: rgba(239, 83, 80, 0.5);
+}
+
+/* ── Mapa ──────────────────────────────────────────────────────────────────────── */
+.map-wrapper {
+  position: relative;
+  flex: 1;           /* ocupa todo el espacio restante en standalone */
+  min-height: 380px; /* altura mínima en embebido */
+}
+
+#finca-map-container {
+  height: 100%;
+  width: 100%;
+  background: var(--c-dark);
+}
+
+/* En embebido, altura fija */
+.map-shell--embebido .map-wrapper {
+  flex: none;
+  height: 400px;
+}
+
+.map-shell--embebido #finca-map-container {
+  height: 400px;
+}
+
+/* ── Coords badge ────────────────────────────────────────────────────────────── */
+.coords-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 38, 18, 0.85);
+  color: var(--c-accent);
+  font-size: 0.68rem;
+  font-family: 'Courier New', monospace;
+  padding: 3px 10px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 1000;
+  border: 1px solid var(--c-border);
+  letter-spacing: 0.04em;
+}
+
+/* ── Footer / estado ─────────────────────────────────────────────────────────── */
+.map-footer {
+  padding: 10px 16px;
+  background: var(--c-surface);
+  border-top: 1px solid var(--c-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.estado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--c-text-muted);
+  line-height: 1.4;
+}
+
+.estado--ok {
+  color: var(--c-accent);
+}
+
+.estado-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef5350;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(239, 83, 80, 0.2);
+}
+
+.estado--ok .estado-dot {
+  background: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+/* ── Pasos de instrucción ────────────────────────────────────────────────────── */
+.pasos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.paso {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.73rem;
+  color: var(--c-text-muted);
+}
+
+.paso-n {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--c-primary-dark);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Sobreescribir Leaflet.draw para que encaje con el tema oscuro ─────────── */
+:host ::ng-deep .leaflet-draw-toolbar a,
+:host ::ng-deep .leaflet-bar a {
+  background-color: var(--c-surface) !important;
+  border-color: var(--c-border-mid) !important;
+  color: var(--c-text) !important;
+}
+
+:host ::ng-deep .leaflet-draw-toolbar a:hover,
+:host ::ng-deep .leaflet-bar a:hover {
+  background-color: var(--c-surface-2) !important;
+}
+
+:host ::ng-deep .leaflet-draw-actions a {
+  background-color: var(--c-primary-dark) !important;
+  color: #fff !important;
+}
+
+:host ::ng-deep .leaflet-control-zoom {
+  border-color: var(--c-border-mid) !important;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .map-toolbar {
+    gap: 8px;
+  }
+
+  .tile-btn {
+    padding: 4px 9px;
+    font-size: 0.75rem;
+  }
+
+  .map-shell--embebido .map-wrapper,
+  .map-shell--embebido #finca-map-container {
+    height: 280px;
+  }
+
+  .pasos {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+
+
+
+

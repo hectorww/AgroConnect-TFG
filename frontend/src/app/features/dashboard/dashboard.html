@@ -2,7 +2,6 @@
 
 <div class="dashboard-page">
 
-  <!-- Header -->
   <div class="dashboard-header">
     <div class="header-content">
       <div class="welcome-section">
@@ -15,7 +14,6 @@
 
   <div class="dashboard-content">
 
-    <!-- Stats Row - Bento Grid -->
     <div class="stats-bento">
       <div class="stat-card stat-primary">
         <div class="stat-header">
@@ -54,15 +52,13 @@
         </div>
         <div class="stat-value">{{ cultivosActivos }}</div>
         <div class="stat-footer">
-          <span class="stat-sublabel">Variedad de producción</span>
+          <span class="stat-sublabel">Variedad de production</span>
         </div>
       </div>
     </div>
 
-    <!-- Main Grid -->
     <div class="main-grid">
 
-      <!-- Alertas Panel (ancho completo) -->
       <div class="panel alertas-panel">
         <div class="panel-header">
           <div class="panel-title-row">
@@ -72,66 +68,55 @@
         </div>
 
         <div class="alertas-container">
-          <div class="alerta-item alerta-critica">
-            <div class="alerta-indicador"></div>
-            <div class="alerta-contenido">
-              <div class="alerta-titulo">
-                <span class="alerta-texto">Riesgo de Helada</span>
-              </div>
-              <div class="alerta-info">
-                <span class="alerta-ubicacion">Zona Norte - Sector 3</span>
-                <span class="alerta-tiempo">Próximas 24-48 horas</span>
-              </div>
-              <div class="alerta-temperatura">
-                <span class="temp-valor">-2°C</span>
-                <span class="temp-label">Mínima prevista</span>
-              </div>
-            </div>
-            <div class="alerta-acciones">
-              <button class="btn-alerta-primary">Ver detalles</button>
-            </div>
-          </div>
 
-          <div class="alerta-item alerta-warning">
-            <div class="alerta-indicador"></div>
-            <div class="alerta-contenido">
-              <div class="alerta-titulo">
-                <span class="alerta-texto">Lluvias Intensas</span>
-              </div>
-              <div class="alerta-info">
-                <span class="alerta-ubicacion">Finca El Limonar</span>
-                <span class="alerta-tiempo">Fin de semana</span>
-              </div>
-              <div class="alerta-precipitacion">
-                <span class="precip-valor">45mm</span>
-                <span class="precip-label">Precipitación acumulada</span>
-              </div>
-            </div>
-            <div class="alerta-acciones">
-              <button class="btn-alerta-primary">Ver detalles</button>
-            </div>
-          </div>
-
-          <div class="alerta-item alerta-info">
+          <div *ngIf="alertasReales.length === 0 && !loading" class="alerta-item alerta-info">
             <div class="alerta-indicador"></div>
             <div class="alerta-contenido">
               <div class="alerta-titulo">
                 <span class="alerta-texto">Condiciones Óptimas</span>
               </div>
               <div class="alerta-info">
-                <span class="alerta-ubicacion">Viñedos Altura</span>
-                <span class="alerta-tiempo">Actualizado hace 2h</span>
-              </div>
-              <div class="alerta-condiciones">
-                <span class="cond-valor">22°C</span>
-                <span class="cond-label">65% humedad</span>
+                <span class="alerta-ubicacion">Todas tus fincas</span>
+                <span class="alerta-tiempo">Motor de IA activo / Sin riesgos detectados</span>
               </div>
             </div>
           </div>
+
+          <div *ngFor="let alerta of alertasReales" 
+               class="alerta-item"
+               [ngClass]="{
+                 'alerta-critica': alerta.clima.analisis_inteligente.nivel === 'CRITICO',
+                 'alerta-warning': alerta.clima.analisis_inteligente.nivel === 'ALTO'
+               }">
+            
+            <div class="alerta-indicador"></div>
+            <div class="alerta-contenido">
+              <div class="alerta-titulo">
+                <span class="alerta-texto">{{ alerta.clima.analisis_inteligente.tipo | titlecase }}</span>
+              </div>
+              <div class="alerta-info">
+                <span class="alerta-ubicacion">{{ alerta.fincaNombre }}</span>
+                <span class="alerta-tiempo">{{ alerta.clima.descripcion | titlecase }}</span>
+              </div>
+              
+              <p class="alerta-mensaje" style="color: rgba(255,255,255,0.75); font-size: 0.9em; margin: 8px 0 0 0; line-height: 1.4; max-width: 90%;">
+                {{ alerta.clima.analisis_inteligente.mensaje }}
+              </p>
+              
+              <div class="alerta-temperatura" style="margin-top: 10px;">
+                <span class="temp-valor">{{ alerta.clima.temperatura }}°C</span>
+                <span class="temp-label">Humedad: {{ alerta.clima.humedad }}%</span>
+              </div>
+            </div>
+            <div class="alerta-acciones">
+              <button class="btn-alerta-primary" routerLink="/fincas/mapa">Ver mapa</button>
+            </div>
+            
+          </div>
+
         </div>
       </div>
 
-      <!-- Gráfica Principal -->
       <div class="panel chart-panel large">
         <div class="panel-header">
           <div class="panel-title-row">
@@ -143,7 +128,6 @@
         </div>
       </div>
 
-      <!-- Distribución Cultivos -->
       <div class="panel chart-panel">
         <div class="panel-header">
           <div class="panel-title-row">
@@ -155,7 +139,6 @@
         </div>
       </div>
 
-      <!-- Fincas Recientes -->
       <div class="panel fincas-panel">
         <div class="panel-header">
           <div class="panel-title-row">
@@ -177,6 +160,90 @@
                 <polyline points="9 18 15 12 9 6" />
               </svg>
             </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-card widget-clima">
+        <div class="widget-header">
+          <h4 class="card-title">CLIMA ACTUAL</h4>
+          <span class="badge">Finca Principal</span>
+        </div>
+        
+        <div class="clima-body">
+          <div class="clima-main">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#60d375" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <span class="temp-gigante">24°C</span>
+          </div>
+          
+          <div class="clima-details">
+            <div class="detail-item">
+              <span class="detail-label">Humedad</span>
+              <span class="detail-value">45%</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Viento</span>
+              <span class="detail-value">12 km/h</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">UV</span>
+              <span class="detail-value">Alto</span>
+            </div>
+          </div>
+
+          <div class="forecast-row">
+            <div class="forecast-day">
+              <span class="day-name">Jue</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfd8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              <span class="day-temp">26°</span>
+            </div>
+            <div class="forecast-day">
+              <span class="day-name">Vie</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfd8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.8A7 7 0 1 0 4 14.9"></path><path d="M12 12v9"></path><path d="M8 17l4 4 4-4"></path></svg>
+              <span class="day-temp">19°</span>
+            </div>
+            <div class="forecast-day">
+              <span class="day-name">Sáb</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#cfd8d0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg>
+              <span class="day-temp">22°</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ag-card widget-sensor">
+        <h4 class="card-title">HUMEDAD DEL SUELO</h4>
+        <div class="sensor-body">
+          <div class="circular-progress" style="--value: 68;">
+            <div class="progress-inner">
+              <span class="progress-text">68%</span>
+            </div>
+          </div>
+          <p class="sensor-status">Nivel Óptimo</p>
+
+          <div class="sensor-details">
+            <div class="s-detail">
+              <span class="s-label">Profundidad</span>
+              <span class="s-value">30 cm</span>
+            </div>
+            <div class="s-detail">
+              <span class="s-label">T. Suelo</span>
+              <span class="s-value">18°C</span>
+            </div>
+            <div class="s-detail">
+              <span class="s-label">Último Riego</span>
+              <span class="s-value">Hace 2h</span>
+            </div>
           </div>
         </div>
       </div>

@@ -10,14 +10,13 @@
     <div class="navbar-links">
       <a href="#hero" class="navbar-link">Inicio</a>
       <a href="#services" class="navbar-link">Funcionalidades</a>
-      <a href="#alert-demo" class="navbar-link">Precios</a>
       <a href="#cta" class="navbar-link">Contacto</a>
     </div>
 
     <!-- Action Buttons -->
     <div class="navbar-actions">
-      <button class="navbar-action btn-ghost">Iniciar sesión</button>
-      <button class="navbar-action btn-primary">Empezar gratis</button>
+      <button class="navbar-action btn-ghost" (click)="goToLogin()">Iniciar sesión</button>
+      <button class="navbar-action btn-primary" (click)="goToRegister()">Empezar gratis</button>
     </div>
 
     <!-- Mobile Menu Toggle -->
@@ -32,11 +31,10 @@
   <div class="navbar-mobile-menu" [class.active]="mobileMenuOpen">
     <a href="#hero" class="navbar-mobile-link" (click)="closeMobileMenu()">Inicio</a>
     <a href="#services" class="navbar-mobile-link" (click)="closeMobileMenu()">Funcionalidades</a>
-    <a href="#alert-demo" class="navbar-mobile-link" (click)="closeMobileMenu()">Precios</a>
     <a href="#cta" class="navbar-mobile-link" (click)="closeMobileMenu()">Contacto</a>
     <div class="navbar-mobile-actions">
-      <button class="btn-ghost">Iniciar sesión</button>
-      <button class="btn-primary">Empezar gratis</button>
+      <button class="btn-ghost" (click)="goToLogin()">Iniciar sesión</button>
+      <button class="btn-primary" (click)="goToRegister()">Empezar gratis</button>
     </div>
   </div>
 </nav>

@@ -6,6 +6,7 @@ import {
   OnDestroy,
   ViewChild
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -41,7 +42,11 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
   // Event handlers stored for cleanup
   private resizeHandler!: () => void;
 
-  constructor(private el: ElementRef, private ngZone: NgZone) {}
+  constructor(
+    private el: ElementRef,
+    private ngZone: NgZone,
+    private router: Router
+  ) {}
 
   async ngAfterViewInit(): Promise<void> {
     // Dynamic import of Three.js
@@ -119,7 +124,7 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     if (!this.THREE) return;
     const THREE = this.THREE;
 
-    const geometry = new THREE.PlaneGeometry(400, 400, 150, 150);
+    const geometry = new THREE.PlaneGeometry(1200, 1200, 150, 150);
 
     // Custom shader material for rolling hills
     this.terrainMaterial = new THREE.ShaderMaterial({
@@ -207,8 +212,8 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
 
     for (let i = 0; i < count; i++) {
       // Random position across the terrain
-      const x = (Math.random() - 0.5) * 180;
-      const z = (Math.random() - 0.5) * 180;
+      const x = (Math.random() - 0.5) * 520;
+      const z = (Math.random() - 0.5) * 520;
 
       // Skip center area (where text is)
       if (Math.abs(x) < 30 && Math.abs(z) < 30) {
@@ -248,9 +253,9 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     const speeds = new Float32Array(particleCount);
 
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 200;     // x
+      positions[i * 3] = (Math.random() - 0.5) * 600;     // x
       positions[i * 3 + 1] = Math.random() * 60;           // y
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 200; // z
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 600; // z
       speeds[i] = 0.02 + Math.random() * 0.05;
     }
 
@@ -416,6 +421,14 @@ export class HeroComponent implements AfterViewInit, OnDestroy {
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
+  }
+
+  goToRegister(): void {
+    this.router.navigate(['/register']);
   }
 
   ngOnDestroy(): void {

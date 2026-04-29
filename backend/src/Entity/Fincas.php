@@ -28,6 +28,15 @@ class Fincas
     #[ORM\Column]
     private array $geo_json = [];
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $cultivo = null;
+
+        #[ORM\Column(nullable: true)]
+    private ?float $latitud = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?float $longitud = null;
+
     #[ORM\OneToMany(targetEntity: Alertas::class, mappedBy: 'finca', orphanRemoval: true)]
     private Collection $alertas;
 
@@ -89,6 +98,18 @@ class Fincas
         return $this;
     }
 
+    public function getCultivo(): ?string
+    {
+        return $this->cultivo;
+    }
+
+    public function setCultivo(?string $cultivo): static
+    {
+        $this->cultivo = $cultivo;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, Alertas>
      */
@@ -114,6 +135,29 @@ class Fincas
                 $alerta->setFinca(null);
             }
         }
+
+        return $this;
+    }
+    public function getLatitud(): ?float
+    {
+        return $this->latitud;
+    }
+
+    public function setLatitud(?float $latitud): static
+    {
+        $this->latitud = $latitud;
+
+        return $this;
+    }
+
+    public function getLongitud(): ?float
+    {
+        return $this->longitud;
+    }
+
+    public function setLongitud(?float $longitud): static
+    {
+        $this->longitud = $longitud;
 
         return $this;
     }

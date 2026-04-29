@@ -52,4 +52,35 @@ export class FincaListComponent implements OnInit {
   get cultivosUnicos(): number {
     return new Set(this.fincas.map(f => f.cultivo ?? 'Sin especificar')).size;
   }
+
+eliminarFinca(id: number) {
+  if (confirm('¿Estás seguro de que deseas eliminar esta parcela?')) {
+    // INDICADOR VISUAL INMEDIATO:
+    // Esto activará el spinner/overlay de la p-table de PrimeNG
+    this.loading = true;
+
+    this.fincaService.deleteFinca(id).subscribe({
+      next: () => {
+        // Actualizamos la lista local
+        this.fincas = [...this.fincas.filter(f => f.id !== id)];
+        
+        // Finalizamos el estado de carga
+        this.loading = false;
+        this.cdr.detectChanges();
+        console.log('Finca eliminada con éxito [cite: 79]');
+      },
+      error: (err) => {
+        // MUY IMPORTANTE: Desactivar el loading si hay error para no bloquear la pantalla
+        this.loading = false;
+        this.cdr.detectChanges();
+        
+        if (err.status === 403) {
+          alert('No tienes permisos para eliminar esta finca [cite: 125, 127]');
+        } else {
+          console.error("Error al eliminar la finca:", err);
+        }
+      }
+    });
+  }
+}
 }

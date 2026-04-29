@@ -119,7 +119,7 @@
           <!-- Email -->
           <div class="field-group">
             <label class="field-label" for="email">Correo electrónico</label>
-            <div class="field-input-wrap" [class.field-error]="showErrors && !email">
+            <div class="field-input-wrap" [class.field-error]="showErrors && (!email || !emailValido)">
               <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                 <polyline points="22,6 12,13 2,6"/>
@@ -135,6 +135,7 @@
               />
             </div>
             <span class="field-error-msg" *ngIf="showErrors && !email">El correo es obligatorio</span>
+            <span class="field-error-msg" *ngIf="showErrors && email && !emailValido">El formato del correo no es válido</span>
           </div>
 
           <!-- Contraseña -->
@@ -150,7 +151,7 @@
                 id="password"
                 [type]="showPassword ? 'text' : 'password'"
                 class="field-input"
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 [(ngModel)]="password"
                 name="password"
                 autocomplete="new-password"
@@ -168,8 +169,8 @@
             <span class="field-error-msg" *ngIf="showErrors && !password">
               La contraseña es obligatoria
             </span>
-            <span class="field-error-msg" *ngIf="showErrors && password && password.length < 6">
-              Mínimo 6 caracteres
+            <span class="field-error-msg" *ngIf="showErrors && password && password.length < 8">
+              Mínimo 8 caracteres
             </span>
           </div>
 

@@ -5,5 +5,7 @@ export interface Finca {
     nombre: string;
     hectareas: number;
     cultivo: string;
-    geo_json: any[]; 
+    lat:number;
+    lon:number;
+    geo_json: any | null;
 }

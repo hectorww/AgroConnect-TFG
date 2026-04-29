@@ -8,6 +8,7 @@ import {
   NgZone
 } from '@angular/core';
 import { gsap } from 'gsap';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -21,7 +22,11 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
   mobileMenuOpen = false;
   private ctx!: gsap.Context;
 
-  constructor(private el: ElementRef, private ngZone: NgZone) {}
+  constructor(
+    private el: ElementRef,
+    private ngZone: NgZone,
+    private router: Router
+  ) {}
 
   ngAfterViewInit(): void {
     // Entrance animations removed to prevent visibility bugs
@@ -39,6 +44,16 @@ export class NavbarComponent implements AfterViewInit, OnDestroy {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen = false;
+  }
+
+  goToLogin(): void {
+    this.closeMobileMenu();
+    this.router.navigate(['/login']);
+  }
+
+  goToRegister(): void {
+    this.closeMobileMenu();
+    this.router.navigate(['/register']);
   }
 
   ngOnDestroy(): void {
