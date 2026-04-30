@@ -5,7 +5,11 @@ import {
 import { CommonModule } from '@angular/common';
 import { Navbar } from '../../../shared/navbar/navbar';
 import * as L from 'leaflet';
+// Importar así fuerza que leaflet-draw se adjunte al L correcto
 import 'leaflet-draw';
+
+// Workaround para producción: asegurar que Draw está disponible
+declare const window: any;
 
 export interface FincaZona {
   latitud: number;
@@ -105,57 +109,57 @@ export class FincaMap implements OnInit, AfterViewInit, OnDestroy {
   }
 
 private initDrawControls(): void {
-    const estiloBase = {
-      color: '#4CAF50',
-      fillColor: '#8BC34A',
-      fillOpacity: 0.25,
-      weight: 2
-    };
+  const estiloBase = {
+    color: '#4CAF50',
+    fillColor: '#8BC34A',
+    fillOpacity: 0.25,
+    weight: 2
+  };
 
-    const opciones = {
-      draw: {
-        polygon: {
-          allowIntersection: false,
-          // Workaround: evita el crash "type is not defined" en leaflet-draw
-          showArea: false,
-          shapeOptions: estiloBase
-        },
-// ...
-        rectangle: false as any,
-        polyline: false as any,
-        circle: false as any,
-        circlemarker: false as any,
-        marker: false as any
+  const opciones = {
+    draw: {
+      polygon: {
+        allowIntersection: false,
+        showArea: false,
+        shapeOptions: estiloBase
       },
-      edit: {
-        featureGroup: this.drawnItems,
-        remove: true
-      }
-    };
+      rectangle: false as any,
+      polyline: false as any,
+      circle: false as any,
+      circlemarker: false as any,
+      marker: false as any
+    },
+    edit: {
+      featureGroup: this.drawnItems,
+      remove: true
+    }
+  };
 
-    // @ts-ignore – leaflet-draw extiende L en runtime sin tipos completos
-    this.drawControl = new (L as any).Control.Draw(opciones);
-    this.map.addControl(this.drawControl);
+  // Usar window.L garantiza la instancia correcta en producción minificada
+  const LDraw = (window as any).L || L;
 
-    this.map.on((L as any).Draw.Event.CREATED, (e: any) => {
-      this.drawnItems.clearLayers();
-      this.drawnItems.addLayer(e.layer);
-      this.ngZone.run(() => {
-        this.hayPoligono = true;
-        this.emitirZona(e.layer);
-      });
+  this.drawControl = new LDraw.Control.Draw(opciones);
+  this.map.addControl(this.drawControl);
+
+  this.map.on(LDraw.Draw.Event.CREATED, (e: any) => {
+    this.drawnItems.clearLayers();
+    this.drawnItems.addLayer(e.layer);
+    this.ngZone.run(() => {
+      this.hayPoligono = true;
+      this.emitirZona(e.layer);
     });
+  });
 
-    this.map.on((L as any).Draw.Event.EDITED, (e: any) => {
-      e.layers.eachLayer((layer: any) => {
-        this.ngZone.run(() => this.emitirZona(layer));
-      });
+  this.map.on(LDraw.Draw.Event.EDITED, (e: any) => {
+    e.layers.eachLayer((layer: any) => {
+      this.ngZone.run(() => this.emitirZona(layer));
     });
+  });
 
-    this.map.on((L as any).Draw.Event.DELETED, () => {
-      this.ngZone.run(() => { this.hayPoligono = false; });
-    });
-  }
+  this.map.on(LDraw.Draw.Event.DELETED, () => {
+    this.ngZone.run(() => { this.hayPoligono = false; });
+  });
+}
 
   private cargarGeoJson(geoJsonStr: string): void {
     try {
