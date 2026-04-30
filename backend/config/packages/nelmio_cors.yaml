@@ -1,19 +1,19 @@
 nelmio_cors:
     defaults:
-        origin_regex: true
+        origin_regex: false
         allow_origin:
             - 'http://localhost:4200'
-            - '%env(CORS_ALLOW_ORIGIN)%'
+            - 'https://frontend-production-fa03f.up.railway.app'
         allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
         allow_headers: ['Content-Type', 'Authorization']
         expose_headers: ['Authorization']
         max_age: 3600
     paths:
         '^/api/':
-            origin_regex: true
+            origin_regex: false
             allow_origin:
                 - 'http://localhost:4200'
-                - '%env(CORS_ALLOW_ORIGIN)%'
+                - 'https://frontend-production-fa03f.up.railway.app'
             allow_methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']
             allow_headers: ['Content-Type', 'Authorization']
             max_age: 3600
